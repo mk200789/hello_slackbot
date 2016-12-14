@@ -2,6 +2,7 @@ import os
 import time
 from slackclient import SlackClient
 import sys
+import json
 
 try:
     import apiai
@@ -50,10 +51,14 @@ def parse_slack_output(slack_rtm_output):
 
 def handle_command(command, channel):
 	response = "Not sure what you mean. Please use the " + EXAMPLE_COMMAND + "* command with numbers"
-	if command.startswith(EXAMPLE_COMMAND):
+	request = apiai_client.text_request()
+	request.query = command
+	r = request.getresponse().read()
+	ai_response = json.loads(r)['result']
+	if ai_response['action'].startswith('smalltalk'):
+		response = ai_response['fulfillment']['speech']
+	elif command.startswith(EXAMPLE_COMMAND):
 		response = "Sure...write some more code then I can do that!"
-	elif command == "hello":
-		response = "Hi there! I'm " + BOT_NAME
 
 	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
