@@ -19,37 +19,43 @@ slack_client = SlackClient(SLACK_BOT_TOKEN)
 AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = "do"
 
-
 def parse_slack_output(slack_rtm_output):
 	output_list = slack_rtm_output
+
 	if output_list and len(output_list) > 0:
 		for output in output_list:
-			if output and 'text' in output and AT_BOT in output['text']:
-				# return text after the @ mention, whitespace removed
-				return output['text'].split(AT_BOT)[1].strip().lower(), output['channel']
+			if len(output.keys()) < 9:
+				if output and 'text' in output and AT_BOT in output['text']:
+					# return text after the @ mention, whitespace removed
+					return output['text'].split(AT_BOT)[1].strip().lower(), output['channel']
+				elif output and 'text' in output and output['channel'].startswith('D'):
+					return output['text'].strip().lower(), output['channel']
 	return None, None
 
 
 def handle_command(command, channel):
 	response = "Not sure what you mean. Please use the " + EXAMPLE_COMMAND + "* command with numbers"
-
 	if command.startswith(EXAMPLE_COMMAND):
 		response = "Sure...write some more code then I can do that!"
-	if command == "hello":
+	elif command == "hello":
 		response = "Hi there! I'm " + BOT_NAME
+
 	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 
+
 if __name__ == '__main__':
-	READ_WEBSOCKET_DELAY = 1 #per second
+	READ_WEBSOCKET_DELAY = 0.5 #per second
 	if slack_client.rtm_connect():
 		print(BOT_NAME + " connected and running!")
 		while True:
 			rtm = slack_client.rtm_read()
-			# print "hey hey:  ", rtm
+
 			command, channel = parse_slack_output(rtm)
+
 			if command and channel:
 				handle_command(command, channel)
+
 			time.sleep(READ_WEBSOCKET_DELAY)
 	else:
 		print(BOT_NAME+ " not connected!")
