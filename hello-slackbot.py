@@ -50,17 +50,40 @@ def parse_slack_output(slack_rtm_output):
 
 
 def handle_command(command, channel):
-	response = "Not sure what you mean. Please use the " + EXAMPLE_COMMAND + "* command with numbers"
+	attachments = []
+	response = "Not sure what you mean. \nPlease use the " + EXAMPLE_COMMAND + "* command with numbers :robot_face:"
 	request = apiai_client.text_request()
 	request.query = command
 	r = request.getresponse().read()
 	ai_response = json.loads(r)['result']
-	if ai_response['action'].startswith('smalltalk') and 'unknown' not in ai_response['action']:
+	if ai_response['action'] == 'smalltalk.greetings' or ai_response['action'] == 'smalltalk.user':
 		response = ai_response['fulfillment']['speech']
 	elif command.startswith(EXAMPLE_COMMAND):
 		response = "Sure...write some more code then I can do that!"
-
-	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+		attachments = [{
+			"text": "Do you want to see a youtube video?",
+			"attachment_type": "default",
+			"color": "#dd2e4e",
+			"actions": [{
+				"name": "yes",
+				"text": "Yes",
+				"type": "button",
+				"value": "yes",
+				"confirm": {
+					"title": "Are you sure?",
+					"text": "It's gonna be awesome if you do!",
+					"ok_text": "Yes",
+					"dismiss_text": "No"
+					}
+				},{
+				"name": "no",
+				"text": "No",
+				"type": "button",
+				"value": "no"
+				}
+			]
+		}]
+	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True, attachments= attachments)
 
 
 
