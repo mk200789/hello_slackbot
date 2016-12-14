@@ -1,6 +1,15 @@
 import os
 import time
 from slackclient import SlackClient
+import sys
+
+try:
+    import apiai
+except ImportError:
+    sys.path.append(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+    )
+    import apiai
 
 #bot name
 BOT_NAME = 'hello-slackbot'
@@ -11,8 +20,14 @@ BOT_ID = os.environ.get('SLACK_BOT_ID')
 #get slack bot token
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
 
+#get aiapi access token
+APIAI_ACCESS_TOKEN = os.environ.get('APIAI_DEVELOPER_ACCESS_TOKEN')
+
 #set slack client
 slack_client = SlackClient(SLACK_BOT_TOKEN)
+
+#set apiai client
+apiai_client = apiai.ApiAI(APIAI_ACCESS_TOKEN)
 
 
 # constants
