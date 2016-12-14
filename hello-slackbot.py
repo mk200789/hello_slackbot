@@ -55,7 +55,7 @@ def handle_command(command, channel):
 	request.query = command
 	r = request.getresponse().read()
 	ai_response = json.loads(r)['result']
-	if ai_response['action'].startswith('smalltalk'):
+	if ai_response['action'].startswith('smalltalk') and 'unknown' not in ai_response['action']:
 		response = ai_response['fulfillment']['speech']
 	elif command.startswith(EXAMPLE_COMMAND):
 		response = "Sure...write some more code then I can do that!"
