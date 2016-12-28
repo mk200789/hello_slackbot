@@ -40,11 +40,11 @@ def parse_slack_output(slack_rtm_output):
 
 	if output_list and len(output_list) > 0:
 		for output in output_list:
-			if len(output.keys()) < 9:
+			# print "output: ", len(output.keys()), output , "\n\n", BOT_ID, "\n\n"
 				if output and 'text' in output and AT_BOT in output['text']:
 					# return text after the @ mention, whitespace removed
 					return output['text'].split(AT_BOT)[1].strip().lower(), output['channel']
-				elif output and 'text' in output and output['channel'].startswith('D'):
+				elif output and 'text' in output and output['channel'].startswith('D') and not 'bot_id' in output:
 					return output['text'].strip().lower(), output['channel']
 	return None, None
 
@@ -93,6 +93,8 @@ if __name__ == '__main__':
 		print(BOT_NAME + " connected and running!")
 		while True:
 			rtm = slack_client.rtm_read()
+
+			print rtm
 
 			command, channel = parse_slack_output(rtm)
 
