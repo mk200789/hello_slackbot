@@ -13,7 +13,8 @@ except ImportError:
     import apiai
 
 #bot name
-BOT_NAME = 'hello-slackbot'
+# BOT_NAME = 'demobot'
+BOT_NAME = "helloslackapp"
 
 #get bot id
 BOT_ID = os.environ.get('SLACK_BOT_ID')
@@ -35,6 +36,7 @@ apiai_client = apiai.ApiAI(APIAI_ACCESS_TOKEN)
 AT_BOT = "<@" + BOT_ID + ">"
 EXAMPLE_COMMAND = "do"
 
+
 def parse_slack_output(slack_rtm_output):
 	output_list = slack_rtm_output
 
@@ -49,6 +51,7 @@ def parse_slack_output(slack_rtm_output):
 	return None, None
 
 
+
 def handle_command(command, channel):
 	attachments = []
 	response = "Not sure what you mean. \nPlease use the " + EXAMPLE_COMMAND + "* command with numbers :robot_face:"
@@ -58,23 +61,46 @@ def handle_command(command, channel):
 	ai_response = json.loads(r)['result']
 	if ai_response['action'] == 'smalltalk.greetings' or ai_response['action'] == 'smalltalk.user':
 		response = ai_response['fulfillment']['speech']
+	elif 'intentName' in ai_response['metadata'] and ai_response['metadata']['intentName'] == 'help':
+		response = "Welcome. The best way to learn is by example. Follow this 2 step guide in how to use me."
+		# msg = "To load your event data ask me this: \n Load event data from /home/ubuntu/data/events/event_data.csv\n\nTo Load your meta data ask me this: \n Load metadata from /home/ubuntu/data/meta\n\nClick 1 to continue"
+		attachments = [{
+			"text": "Click 1 if you have not loaded your data. Otherwise, please continue on to 2.",
+			"attachment_type": "default",
+			"callback_id": "demo_button_id",
+			"fallback": "wowweee!",
+			"color": "#f44262",
+			"actions": [{
+				"name": "part_1",
+				"text": "1",
+				"type": "button",
+				"value": "val_1"
+				},{
+				"name": "part_2",
+				"text": "2",
+				"type": "button",
+				"value": "val_2"
+				},{
+				"name": "part_3",
+				"text": "3",
+				"type": "button",
+				"value": "val_3"
+				}
+			]
+		}]
 	elif command.startswith(EXAMPLE_COMMAND):
 		response = "Sure...write some more code then I can do that!"
 		attachments = [{
 			"text": "Do you want to see a youtube video?",
 			"attachment_type": "default",
+			"callback_id": "demo_button_id",
+			"fallback": "wowweee!",
 			"color": "#dd2e4e",
 			"actions": [{
 				"name": "yes",
 				"text": "Yes",
 				"type": "button",
-				"value": "yes",
-				"confirm": {
-					"title": "Are you sure?",
-					"text": "It's gonna be awesome if you do!",
-					"ok_text": "Yes",
-					"dismiss_text": "No"
-					}
+				"value": "yes"
 				},{
 				"name": "no",
 				"text": "No",
@@ -94,7 +120,8 @@ if __name__ == '__main__':
 		while True:
 			rtm = slack_client.rtm_read()
 
-			print rtm
+			if rtm:
+				print rtm
 
 			command, channel = parse_slack_output(rtm)
 
