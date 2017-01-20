@@ -9,3 +9,4 @@ Tech stack used:
 * Flask
 * Api.ai
 * Slack
+* AWS Lambda
